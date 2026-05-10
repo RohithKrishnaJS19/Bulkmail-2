@@ -11,7 +11,7 @@ function App() {
     function handlesend() {
         setinput("")
         setstatus(true)
-        axios.post("http://localhost:3000/sendemail", { value: input,email:email }).then(function (data) {
+        axios.post("https://bulkmail-2-wpvg.onrender.com/sendemail", { value: input,email:email }).then(function (data) {
             if (data.data == true) {
                 alert("Gmail Sended Successfully")
                 setstatus(false)
