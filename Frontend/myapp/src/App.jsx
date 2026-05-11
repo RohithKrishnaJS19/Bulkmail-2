@@ -9,12 +9,13 @@ function App() {
         setinput(event.target.value)
     }
     function handlesend() {
-        setinput("")
+        
         setstatus(true)
         axios.post("https://bulkmail-2-wpvg.onrender.com/sendemail", { value: input,email:email }).then(function (data) {
             if (data.data == true) {
                 alert("Gmail Sended Successfully")
                 setstatus(false)
+                setinput("")
             }
             else {
                 setstatus(false)
@@ -24,9 +25,10 @@ function App() {
             alert("Please choose the file")
             setstatus(false)
         })
+        
     }
     const [count,setcount] = useState(0)
-    const [email,setemail] = useState()
+    const [email,setemail] = useState([])
     function handlefile(event) {
         
         const file = event.target.files[0]
