@@ -5,23 +5,32 @@ const mongoose = require("mongoose")
 require("dotenv").config()
 
 const app = express()
-app.use(cors())
+app.use(cors({
+    origin: "https://bulkmail-2.vercel.app",
+    methods: ["GET", "POST"]
+}))
 app.use(express.json())
 
-mongoose.connect(process.env.MONGO_URL)
+mongoose.connect(process.env.MONGO_URL).then(function () {
+    console.log("MongoDB Connected")
+}).catch(function (err) {
+    console.log("MongoDB Error:", err)
+})
 
 const passkey = mongoose.model("summa", {
     user: String,
     pass: String
 }, "student")
 
-app.post("/sendemail", function (req, res) {
-    var msg = req.body.value
-    var email = req.body.email
+app.post("/sendemail", async function (req, res) {
+    try {
+        const msg = req.body.value
+        const email = req.body.email
 
-    passkey.find().then(function (data) {
+        const data = await passkey.find()
         const userdata = data[0].user
         const passdata = data[0].pass
+
         const transport = nodemailer.createTransport({
             service: "gmail",
             auth: {
@@ -29,32 +38,25 @@ app.post("/sendemail", function (req, res) {
                 pass: passdata
             }
         })
-        new Promise(async function (resolve, reject) {
-            try {
-                for (var i = 0; i < email.length; i++) {
-                    await transport.sendMail(
-                        {
-                            from: userdata,
-                            to: email[i],
-                            subject: "Creating a Bulk main app",
-                            text: msg
-                        })
-                    console.log("Email send to :" + email[i])
-                }
-                resolve("Success")
-            }
-            catch {
-                reject("Fail")
-            }
-        }).then(function () {
-            res.send(true)
-        }).catch(function () {
-            res.send(false)
-        })
-    }).catch(function () {
-        console.log("No data")
-    })
+
+        for (let i = 0; i < email.length; i++) {
+            await transport.sendMail({
+                from: userdata,
+                to: email[i],
+                subject: "Creating a Bulk mail app",
+                text: msg
+            })
+            console.log("Email sent to:", email[i])
+        }
+
+        res.send(true)
+
+    } catch (err) {
+        console.log(err)
+        res.send(false)
+    }
 })
+
 
 const PORT = process.env.PORT || 3000;
 
