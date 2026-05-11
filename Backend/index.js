@@ -38,8 +38,10 @@ app.post("/sendemail", async function (req, res) {
                 pass: passdata
             }
         })
-        res.send(true)
-        email.forEach(async (e) => {
+
+        let success = true
+
+        for (const e of email) {
             try {
                 await transport.sendMail({
                     from: userdata,
@@ -47,14 +49,17 @@ app.post("/sendemail", async function (req, res) {
                     subject: "Creating a Bulk mail app",
                     text: msg
                 })
-                console.log("Sent to:", e)
+                console.log("Sent:", e)
             } catch (err) {
-                console.log("Failed:", e)
+                console.log("Failed:", e, err)
+                success = false
             }
-        })
+        }
+
+        res.send(success)
 
     } catch (err) {
-        console.log(err)
+        console.log("GLOBAL ERROR:", err)
         res.send(false)
     }
 })
